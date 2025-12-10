@@ -410,7 +410,7 @@ public abstract class DockerClientProviderStrategy {
         String dockerVersion = getDockerEngineVersionFromCli();
         System.out.println("Detected Docker Engine Version: " + dockerVersion);
 
-        if (isDockerVersionAtLeast(dockerVersion, 25)) {
+        if ("0.0.0".equals(dockerVersion) ||isDockerVersionAtLeast(dockerVersion, 25)) {
             configBuilder.withApiVersion(RemoteApiVersion.VERSION_1_44);
         } else {
             configBuilder.withApiVersion(RemoteApiVersion.VERSION_1_32);
