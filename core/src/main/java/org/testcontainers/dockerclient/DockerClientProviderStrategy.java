@@ -407,18 +407,18 @@ public abstract class DockerClientProviderStrategy {
         DefaultDockerClientConfig.Builder configBuilder = DefaultDockerClientConfig.createDefaultConfigBuilder();
 
 
-        String dockerVersion = getDockerEngineVersionFromCli();
-        System.out.println("Detected Docker Engine Version: " + dockerVersion);
+        // String dockerVersion = getDockerEngineVersionFromCli();
+        // System.out.println("Detected Docker Engine Version: " + dockerVersion);
 
-        if (isDockerVersionAtLeast(dockerVersion, 25)) {
-            configBuilder.withApiVersion(RemoteApiVersion.VERSION_1_44);
-        } else {
-            configBuilder.withApiVersion(RemoteApiVersion.VERSION_1_32);
-        }
-
-        // if (configBuilder.build().getApiVersion() == RemoteApiVersion.UNKNOWN_VERSION) {
+        // if (isDockerVersionAtLeast(dockerVersion, 25)) {
         //     configBuilder.withApiVersion(RemoteApiVersion.VERSION_1_44);
+        // } else {
+        //     configBuilder.withApiVersion(RemoteApiVersion.VERSION_1_32);
         // }
+
+        if (configBuilder.build().getApiVersion() == RemoteApiVersion.UNKNOWN_VERSION) {
+            configBuilder.withApiVersion(RemoteApiVersion.VERSION_1_44);
+        }
 
         Map<String, String> headers = new HashMap<>();
         headers.put("x-tc-sid", DockerClientFactory.SESSION_ID);
