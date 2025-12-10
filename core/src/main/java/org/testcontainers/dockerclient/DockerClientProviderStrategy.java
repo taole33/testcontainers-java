@@ -412,13 +412,13 @@ public abstract class DockerClientProviderStrategy {
 
         DefaultDockerClientConfig.Builder configBuilder = DefaultDockerClientConfig.createDefaultConfigBuilder();
 
-        String apiVersion = getDockerApiVersionFromClient(dockerHttpClient);
-        System.out.println("Detected Docker API Version via Client: " + apiVersion);
-        if (isApiVersionAtLeast(apiVersion, 1, 44)) {
-            configBuilder.withApiVersion(RemoteApiVersion.VERSION_1_44);
-        } else {
-            configBuilder.withApiVersion(RemoteApiVersion.VERSION_1_32);
-        }
+        // String apiVersion = getDockerApiVersionFromClient(dockerHttpClient);
+        // System.out.println("Detected Docker API Version via Client: " + apiVersion);
+        // if (isApiVersionAtLeast(apiVersion, 1, 44)) {
+        //     configBuilder.withApiVersion(RemoteApiVersion.VERSION_1_44);
+        // } else {
+        //     configBuilder.withApiVersion(RemoteApiVersion.VERSION_1_32);
+        // }
 
         // if (configBuilder.build().getApiVersion() == RemoteApiVersion.UNKNOWN_VERSION) {
         //     configBuilder.withApiVersion(RemoteApiVersion.VERSION_1_44);
@@ -485,43 +485,42 @@ public abstract class DockerClientProviderStrategy {
         }
     }
 
-    private static String getDockerApiVersionFromClient(DockerHttpClient client) {
-        try {
-            DockerHttpClient.Request request = DockerHttpClient.Request.builder()
-                    .method(DockerHttpClient.Request.Method.GET)
-                    .path("/version")
-                    .build();
+    // private static String getDockerApiVersionFromClient(DockerHttpClient client) {
+    //     try {
+    //         DockerHttpClient.Request request = DockerHttpClient.Request.builder()
+    //                 .method(DockerHttpClient.Request.Method.GET)
+    //                 .path("/version")
+    //                 .build();
 
-            try (DockerHttpClient.Response response = client.execute(request)) {
-                if (response.getStatusCode() == 200) {
-                    String body = IOUtils.toString(response.getBody(), java.nio.charset.StandardCharsets.UTF_8);
+    //         try (DockerHttpClient.Response response = client.execute(request)) {
+    //             if (response.getStatusCode() == 200) {
+    //                 String body = IOUtils.toString(response.getBody(), java.nio.charset.StandardCharsets.UTF_8);
                     
-                    java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("\"ApiVersion\"\\s*:\\s*\"([0-9.]+)\"");
-                    java.util.regex.Matcher matcher = pattern.matcher(body);
-                    if (matcher.find()) {
-                        return matcher.group(1);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            log.warn("Failed to check docker version via HTTP client", e);
-        }
-        return "1.32";
-    }
+    //                 java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("\"ApiVersion\"\\s*:\\s*\"([0-9.]+)\"");
+    //                 java.util.regex.Matcher matcher = pattern.matcher(body);
+    //                 if (matcher.find()) {
+    //                     return matcher.group(1);
+    //                 }
+    //             }
+    //         }
+    //     } catch (Exception e) {
+    //         log.warn("Failed to check docker version via HTTP client", e);
+    //     }
+    //     return "1.32";
+    // }
 
-    // 【新規追加】APIバージョンの数値比較用
-    private static boolean isApiVersionAtLeast(String currentVersion, int targetMajor, int targetMinor) {
-        try {
-            String[] parts = currentVersion.split("\\.");
-            int major = Integer.parseInt(parts[0]);
-            int minor = Integer.parseInt(parts[1]);
+    // private static boolean isApiVersionAtLeast(String currentVersion, int targetMajor, int targetMinor) {
+    //     try {
+    //         String[] parts = currentVersion.split("\\.");
+    //         int major = Integer.parseInt(parts[0]);
+    //         int minor = Integer.parseInt(parts[1]);
 
-            if (major > targetMajor) return true;
-            if (major == targetMajor && minor >= targetMinor) return true;
-            return false;
-        } catch (Exception e) {
-            return false;
-        }
-    }
+    //         if (major > targetMajor) return true;
+    //         if (major == targetMajor && minor >= targetMinor) return true;
+    //         return false;
+    //     } catch (Exception e) {
+    //         return false;
+    //     }
+    // }
 
 }
