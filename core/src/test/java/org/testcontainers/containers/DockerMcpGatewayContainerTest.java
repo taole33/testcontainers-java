@@ -10,7 +10,7 @@ class DockerMcpGatewayContainerTest {
 
     @Test
     void serviceSuccessfullyStarts() {
-        try (DockerMcpGatewayContainer gateway = new DockerMcpGatewayContainer("docker/mcp-gateway:latest")) {
+        try (DockerMcpGatewayContainer gateway = new DockerMcpGatewayContainer("docker/mcp-gateway:v2")) {
             gateway.start();
 
             assertThat(gateway.isRunning()).isTrue();
@@ -21,7 +21,7 @@ class DockerMcpGatewayContainerTest {
     void gatewayStartsWithServers() {
         try (
             // container {
-            DockerMcpGatewayContainer gateway = new DockerMcpGatewayContainer("docker/mcp-gateway:latest")
+            DockerMcpGatewayContainer gateway = new DockerMcpGatewayContainer("docker/mcp-gateway:v2")
                 .withServer("curl", "curl")
                 .withServer("brave", "brave_local_search", "brave_web_search")
                 .withServer("github-official", Collections.singletonList("add_issue_comment"))
