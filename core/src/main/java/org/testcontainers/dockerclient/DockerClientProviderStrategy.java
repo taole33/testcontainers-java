@@ -5,13 +5,11 @@ import com.github.dockerjava.api.model.Info;
 import com.github.dockerjava.api.model.Network;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientImpl;
-import com.github.dockerjava.core.RemoteApiVersion;
 import com.github.dockerjava.transport.DockerHttpClient;
 import com.github.dockerjava.transport.NamedPipeSocket;
 import com.github.dockerjava.transport.SSLConfig;
 import com.github.dockerjava.transport.UnixSocket;
 import com.github.dockerjava.zerodep.ZerodepDockerHttpClient;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Throwables;
 import lombok.Getter;
@@ -28,15 +26,7 @@ import org.testcontainers.DockerClientFactory;
 import org.testcontainers.UnstableAPI;
 import org.testcontainers.utility.TestcontainersConfiguration;
 
-    import java.nio.charset.StandardCharsets;
-    import java.util.regex.Matcher;
-    import java.util.regex.Pattern;
-
-
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
@@ -484,7 +474,6 @@ public abstract class DockerClientProviderStrategy {
                 return null;
         }
     }
-
     // private static String getDockerApiVersionFromClient(DockerHttpClient client) {
     //     try {
     //         DockerHttpClient.Request request = DockerHttpClient.Request.builder()
@@ -495,7 +484,7 @@ public abstract class DockerClientProviderStrategy {
     //         try (DockerHttpClient.Response response = client.execute(request)) {
     //             if (response.getStatusCode() == 200) {
     //                 String body = IOUtils.toString(response.getBody(), java.nio.charset.StandardCharsets.UTF_8);
-                    
+
     //                 java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("\"ApiVersion\"\\s*:\\s*\"([0-9.]+)\"");
     //                 java.util.regex.Matcher matcher = pattern.matcher(body);
     //                 if (matcher.find()) {
