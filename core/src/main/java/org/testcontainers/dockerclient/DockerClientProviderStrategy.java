@@ -11,6 +11,7 @@ import com.github.dockerjava.transport.NamedPipeSocket;
 import com.github.dockerjava.transport.SSLConfig;
 import com.github.dockerjava.transport.UnixSocket;
 import com.github.dockerjava.zerodep.ZerodepDockerHttpClient;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Throwables;
 import lombok.Getter;
@@ -26,6 +27,11 @@ import org.rnorth.ducttape.unreliables.Unreliables;
 import org.testcontainers.DockerClientFactory;
 import org.testcontainers.UnstableAPI;
 import org.testcontainers.utility.TestcontainersConfiguration;
+
+    import java.nio.charset.StandardCharsets;
+    import java.util.regex.Matcher;
+    import java.util.regex.Pattern;
+
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -406,11 +412,9 @@ public abstract class DockerClientProviderStrategy {
 
         DefaultDockerClientConfig.Builder configBuilder = DefaultDockerClientConfig.createDefaultConfigBuilder();
 
-
-        String dockerVersion = getDockerEngineVersionFromCli();
-        System.out.println("Detected Docker Engine Version: " + dockerVersion);
-
-        if ("0.0.0".equals(dockerVersion) ||isDockerVersionAtLeast(dockerVersion, 25)) {
+        String apiVersion = getDockerApiVersionFromClient(dockerHttpClient);
+        System.out.println("Detected Docker API Version via Client: " + apiVersion);
+        if (isApiVersionAtLeast(apiVersion, 1, 44)) {
             configBuilder.withApiVersion(RemoteApiVersion.VERSION_1_44);
         } else {
             configBuilder.withApiVersion(RemoteApiVersion.VERSION_1_32);
@@ -481,34 +485,41 @@ public abstract class DockerClientProviderStrategy {
         }
     }
 
-
-    private static String getDockerEngineVersionFromCli() {
+    private static String getDockerApiVersionFromClient(DockerHttpClient client) {
         try {
-            ProcessBuilder pb = new ProcessBuilder("docker", "version", "--format", "{{.Server.Version}}");
-            Process process = pb.start();
+            DockerHttpClient.Request request = DockerHttpClient.Request.builder()
+                    .method(DockerHttpClient.Request.Method.GET)
+                    .path("/version")
+                    .build();
 
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                String version = reader.readLine();
-                if (version != null) {
-                    return version.trim();
+            try (DockerHttpClient.Response response = client.execute(request)) {
+                if (response.getStatusCode() == 200) {
+                    String body = IOUtils.toString(response.getBody(), java.nio.charset.StandardCharsets.UTF_8);
+                    
+                    java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("\"ApiVersion\"\\s*:\\s*\"([0-9.]+)\"");
+                    java.util.regex.Matcher matcher = pattern.matcher(body);
+                    if (matcher.find()) {
+                        return matcher.group(1);
+                    }
                 }
             }
-        } catch (IOException e) {
-            System.out.println("Failed to get docker version via CLI");
+        } catch (Exception e) {
+            log.warn("Failed to check docker version via HTTP client", e);
         }
-        return "0.0.0"; 
+        return "1.32";
     }
 
-    private static boolean isDockerVersionAtLeast(String versionString, int targetMajorVersion) {
-        if (versionString == null || versionString.isEmpty()) return false;
-
+    // 【新規追加】APIバージョンの数値比較用
+    private static boolean isApiVersionAtLeast(String currentVersion, int targetMajor, int targetMinor) {
         try {
-            String majorPart = versionString.split("\\.")[0];
-            int majorVersion = Integer.parseInt(majorPart);
+            String[] parts = currentVersion.split("\\.");
+            int major = Integer.parseInt(parts[0]);
+            int minor = Integer.parseInt(parts[1]);
 
-            return majorVersion >= targetMajorVersion;
-        } catch (NumberFormatException e) {
-            System.out.println("Failed to parse docker version string: {}"+ versionString);
+            if (major > targetMajor) return true;
+            if (major == targetMajor && minor >= targetMinor) return true;
+            return false;
+        } catch (Exception e) {
             return false;
         }
     }
