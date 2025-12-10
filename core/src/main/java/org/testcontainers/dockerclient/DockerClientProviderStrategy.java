@@ -27,7 +27,10 @@ import org.testcontainers.DockerClientFactory;
 import org.testcontainers.UnstableAPI;
 import org.testcontainers.utility.TestcontainersConfiguration;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
@@ -403,9 +406,20 @@ public abstract class DockerClientProviderStrategy {
 
         DefaultDockerClientConfig.Builder configBuilder = DefaultDockerClientConfig.createDefaultConfigBuilder();
 
-        if (configBuilder.build().getApiVersion() == RemoteApiVersion.UNKNOWN_VERSION) {
+
+        String dockerVersion = getDockerEngineVersionFromCli();
+        System.out.println("Detected Docker Engine Version: " + dockerVersion);
+
+        if (isDockerVersionAtLeast(dockerVersion, 25)) {
             configBuilder.withApiVersion(RemoteApiVersion.VERSION_1_44);
+        } else {
+            configBuilder.withApiVersion(RemoteApiVersion.VERSION_1_32);
         }
+
+        // if (configBuilder.build().getApiVersion() == RemoteApiVersion.UNKNOWN_VERSION) {
+        //     configBuilder.withApiVersion(RemoteApiVersion.VERSION_1_44);
+        // }
+
         Map<String, String> headers = new HashMap<>();
         headers.put("x-tc-sid", DockerClientFactory.SESSION_ID);
         headers.put("User-Agent", String.format("tc-java/%s", DockerClientFactory.TESTCONTAINERS_VERSION));
@@ -466,4 +480,38 @@ public abstract class DockerClientProviderStrategy {
                 return null;
         }
     }
+
+
+    private static String getDockerEngineVersionFromCli() {
+        try {
+            // dockerコマンドのパスが通っている前提
+            ProcessBuilder pb = new ProcessBuilder("docker", "version", "--format", "{{.Server.Version}}");
+            Process process = pb.start();
+
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String version = reader.readLine();
+                if (version != null) {
+                    return version.trim();
+                }
+            }
+        } catch (IOException e) {
+            log.warn("Failed to get docker version via CLI", e);
+        }
+        return "0.0.0"; 
+    }
+
+    private static boolean isDockerVersionAtLeast(String versionString, int targetMajorVersion) {
+        if (versionString == null || versionString.isEmpty()) return false;
+
+        try {
+            String majorPart = versionString.split("\\.")[0];
+            int majorVersion = Integer.parseInt(majorPart);
+
+            return majorVersion >= targetMajorVersion;
+        } catch (NumberFormatException e) {
+            log.warn("Failed to parse docker version string: {}", versionString);
+            return false;
+        }
+    }
+
 }
