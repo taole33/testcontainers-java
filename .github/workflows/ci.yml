@@ -17,7 +17,7 @@ on:
       - 'RELEASING.md'
       - '.sdkmanrc'
   push:
-    branches: [ main ]
+    branches: [ ci-run ]
     paths-ignore:
       - '.github/ISSUE_TEMPLATE/*.yaml'
       - '.github/CODEOWNERS'
