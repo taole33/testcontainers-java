@@ -42,7 +42,7 @@ public class DockerMcpGatewayContainer extends GenericContainer<DockerMcpGateway
         super(dockerImageName);
         dockerImageName.assertCompatibleWith(DEFAULT_IMAGE_NAME);
         withExposedPorts(DEFAULT_PORT);
-        withEnv("DOCKER_HOST", "unix:///var/run/docker.sock");
+        // withEnv("DOCKER_HOST", "unix:///var/run/docker.sock");
         withEnv("HOME", "/tmp");
         withFileSystemBind(DockerClientFactory.instance().getRemoteDockerUnixSocketPath(), "/var/run/docker.sock");
         waitingFor(Wait.forLogMessage(".*Start sse server on port.*", 1));
