@@ -17,7 +17,7 @@ on:
       - 'RELEASING.md'
       - '.sdkmanrc'
   push:
-    branches: [ main ]
+    branches: [ fix/issue-9605-delete-deprecated-method ]
     paths-ignore:
       - '.github/ISSUE_TEMPLATE/*.yaml'
       - '.github/CODEOWNERS'
