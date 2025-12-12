@@ -39,7 +39,7 @@ public class K3sContainer extends GenericContainer<K3sContainer> {
         withCreateContainerCmdModifier(it -> {
             it.getHostConfig().withCgroupnsMode("host");
         });
-        // addFileSystemBind("/sys/fs/cgroup", "/sys/fs/cgroup", BindMode.READ_WRITE);
+        addFileSystemBind("/sys/fs/cgroup", "/sys/fs/cgroup", BindMode.READ_WRITE);
 
         Map<String, String> tmpFsMapping = new HashMap<>();
         tmpFsMapping.put("/run", "");
