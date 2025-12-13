@@ -25,20 +25,20 @@ public class Issue10365Test {
             GenericContainer<?> container = new GenericContainer<>(
                 new ImageFromDockerfile()
                     .withFileFromString("entrypoint.sh", scriptContent)
-                    .withDockerfileFromBuilder(builder ->
+                    .withDockerfileFromBuilder(builder -> {
                         builder
                             .from("alpine:3.18")
                             .run("apk add --no-cache tini bash")
                             .copy("entrypoint.sh", "/entrypoint.sh")
                             .run("chmod +x /entrypoint.sh")
                             .entryPoint("/sbin/tini", "--", "/entrypoint.sh")
-                            .build()
-                    )
+                            .build();
+                    })
             )
         ) {
             ToStringConsumer logConsumer = new ToStringConsumer();
             container.withLogConsumer(logConsumer);
-            
+
             container.withStartupTimeout(Duration.ofSeconds(30));
 
             container.start();
@@ -48,8 +48,7 @@ public class Issue10365Test {
             String logs = logConsumer.toUtf8String();
             System.out.println("=== CONTAINER LOGS ===\n" + logs + "\n======================");
 
-            assertThat(logs)
-                .contains("HOOK_TRIGGERED");
+            assertThat(logs).contains("HOOK_TRIGGERED");
         }
     }
 }
