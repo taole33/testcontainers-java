@@ -17,7 +17,7 @@ on:
       - 'RELEASING.md'
       - '.sdkmanrc'
   push:
-    branches: [ main ]
+    branches: [ fix/issue-10365-exit-docker ]
     paths-ignore:
       - '.github/ISSUE_TEMPLATE/*.yaml'
       - '.github/CODEOWNERS'

@@ -648,6 +648,17 @@ public class GenericContainer<SELF extends GenericContainer<SELF>>
                 imageName = "<unknown>";
             }
 
+            try {
+                // タイムアウトはデフォルト(10秒)か、ユーザー指定の設定などがあればそれを使うべきですが、
+                // いったんデフォルトの挙動として stopContainerCmd を呼びます。
+                // DockerClientのstopContainerCmdはデフォルトで10秒待ちます。
+                dockerClient.stopContainerCmd(containerId).exec();
+            } catch (NotFoundException e) {
+                // コンテナが既にない場合は無視
+            } catch (Exception e) {
+                // 停止に失敗した場合のログ（ResourceReaperが後で片付けるのでここではWarn程度）
+                logger().warn("Failed to stop container gracefully: {}", e.getMessage());
+            }
             containerIsStopping(containerInfo);
             ResourceReaper.instance().stopAndRemoveContainer(containerId, imageName);
             containerIsStopped(containerInfo);
